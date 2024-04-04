@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ping Pong</title>
+    <style>
+      canvas {
+        border: 1px solid black;
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <button onclick="startGame()">Start Game</button>
+
+    <script>
+      let gameStarted = false;
+
+      function startGame() {
+        if (!gameStarted) {
+          const canvas = document.getElementById("gameCanvas");
+          const ctx = canvas.getContext("2d");
+
+          // Розміри м'яча та ракеток
+          const ballRadius = 10;
+          const paddleHeight = 75;
+          const paddleWidth = 10;
+
+          // Початкові координати м'яча та ракеток
+          let x = canvas.width / 2;
+          let y = canvas.height / 2;
+          let dx = 2;
+          let dy = -2;
+          let paddle1Y = (canvas.height - paddleHeight) / 2;
+          let paddle2Y = (canvas.height - paddleHeight) / 2;
+
+          // Рахунок
+          let score1 = 0;
+          let score2 = 0;
+
+          // Функція малювання м'яча
+          function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+          }
+
+          // Функція малювання ракеток
+          function drawPaddles() {
+            ctx.fillStyle = "#0095DD";
+            ctx.fillRect(0, paddle1Y, paddleWidth, paddleHeight);
+            ctx.fillRect(
+              canvas.width - paddleWidth,
+              paddle2Y,
+              paddleWidth,
+              paddleHeight
+            );
+          }
+
+          // Функція малювання рахунку
+          function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Player 1: " + score1, 20, 20);
+            ctx.fillText("Player 2: " + score2, canvas.width - 100, 20);
+          }
+
+          // Функція малювання гри
+          function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+            drawPaddles();
+            drawScore();
+
+            // Зміна координат м'яча
+            x += dx;
+            y += dy;
+
+            // Відскок від верхньої та нижньої межі поля
+            if (y + dy > canvas.height - ballRadius || y + dy < ballRadius) {
+              dy = -dy;
+            }
+
+            // Відскок від ракеток
+            if (x + dx > canvas.width - ballRadius - paddleWidth) {
+              if (y > paddle2Y && y < paddle2Y + paddleHeight) {
+                dx = -dx;
+              } else {
+                score1++;
+                x = canvas.width / 2;
+                y = canvas.height / 2;
+                dx = -dx;
+              }
+            } else if (x + dx < ballRadius + paddleWidth) {
+              if (y > paddle1Y && y < paddle1Y + paddleHeight) {
+                dx = -dx;
+              } else {
+                score2++;
+                x = canvas.width / 2;
+                y = canvas.height / 2;
+                dx = -dx;
+              }
+            }
+
+            // Переміщення ракеток
+            if (upPressed && paddle1Y > 0) {
+              paddle1Y -= 7;
+            } else if (downPressed && paddle1Y < canvas.height - paddleHeight) {
+              paddle1Y += 7;
+            }
+
+            if (rightPressed && paddle2Y > 0) {
+              paddle2Y -= 7;
+            } else if (leftPressed && paddle2Y < canvas.height - paddleHeight) {
+              paddle2Y += 7;
+            }
+
+            // Перевірка на кінець гри
+            if (score1 === 5 || score2 === 5) {
+              gameStarted = false;
+              if (score1 === 5) {
+                alert("Player 1 wins!");
+              } else {
+                alert("Player 2 wins!");
+              }
+            }
+          }
+
+          // Обробник клавіш для переміщення ракеток
+          let upPressed = false;
+          let downPressed = false;
+          let rightPressed = false;
+          let leftPressed = false;
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowUp") {
+              upPressed = true;
+            } else if (event.key === "ArrowDown") {
+              downPressed = true;
+            } else if (event.key === "ArrowRight") {
+              rightPressed = true;
+            } else if (event.key === "ArrowLeft") {
+              leftPressed = true;
+            }
+          });
+
+          document.addEventListener("keyup", function (event) {
+            if (event.key === "ArrowUp") {
+              upPressed = false;
+            } else if (event.key === "ArrowDown") {
+              downPressed = false;
+            } else if (event.key === "ArrowRight") {
+              rightPressed = false;
+            } else if (event.key === "ArrowLeft") {
+              leftPressed = false;
+            }
+          });
+
+          // Запуск гри
+          setInterval(draw, 10);
+
+          gameStarted = true;
+        }
+      }
+    </script>
+  </body>
+</html>
